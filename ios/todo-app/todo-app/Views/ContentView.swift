@@ -18,7 +18,6 @@ struct ContentView: View {
       @State private var isComplete = false
       @State private var isIncomplete = false
     var body: some View {
-//        let test = TodoApiCalls()
         HStack{
             
             Button(action: {
@@ -250,14 +249,13 @@ struct FilterView: View {
 
             .padding()
             .textFieldStyle(PlainTextFieldStyle())
-        Text(String(isComplete))
+//        Text(String(isComplete))
         
         VStack {
             Toggle("Show incompleted tasks", isOn: $isIncomplete)
+                .padding()
             Toggle("Show completed tasks", isOn: $isComplete)
-            
-            
-            
+                .padding()
         }
         
         

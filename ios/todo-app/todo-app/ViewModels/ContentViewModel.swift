@@ -11,10 +11,11 @@ import SwiftUI
 //extension ContentView {
      @MainActor class ViewModel: ObservableObject {
         @Published var todos: [Todo] = []
+         let todoApi = TodoApiCalls()
         func getallTodos() async {
             let test = TodoApiCalls()
             
-            let allTodos = await test.getTodos()
+            let allTodos = await todoApi.getTodos()
             self.todos = allTodos
         }
          
