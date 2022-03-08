@@ -18,10 +18,9 @@ import SwiftUI
             self.todos = allTodos
         }
          
-         func getallTodosWithFilter(filter: Bool) async {
+         func getallTodosWithFilter(isComplete: Bool, isIncomplete: Bool) async {
              let test = TodoApiCalls()
-             
-             let allTodos = await test.getTodos()
+             let allTodos = await test.getTodosWithFilters(isComplete: isComplete, isIncomplete: isIncomplete)
              self.todos = allTodos
          }
          

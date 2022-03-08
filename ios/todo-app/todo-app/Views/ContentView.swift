@@ -16,6 +16,7 @@ struct ContentView: View {
       @State private var showingUpdateModal = false
       @State private var showingFilterModal = false
       @State private var isComplete = false
+      @State private var isIncomplete = false
     var body: some View {
 //        let test = TodoApiCalls()
         HStack{
@@ -40,7 +41,7 @@ struct ContentView: View {
         }
         
         HStack {
-            Text(String(isComplete))
+//            Text(String(isComplete))
             Button(action: {
                 showingFilterModal.toggle()
             }){
@@ -53,7 +54,7 @@ struct ContentView: View {
                   .foregroundStyle(.black, .blue)
             }.offset(x: 175, y: 35)
                 .sheet(isPresented: $showingFilterModal) {
-                    FilterView(isComplete: isComplete, viewModel: viewModel)
+                    FilterView(isComplete: $isComplete, isIncomplete: $isIncomplete, viewModel: viewModel)
                    }
             
         }
@@ -238,7 +239,8 @@ struct PostModalView: View {
 struct FilterView: View {
     @Environment(\.dismiss) var dismiss
     
-    @State var isComplete: Bool
+    @Binding var isComplete: Bool
+    @Binding var isIncomplete: Bool
     var viewModel: ViewModel
 
     var body: some View {
@@ -251,20 +253,40 @@ struct FilterView: View {
         Text(String(isComplete))
         
         VStack {
-            
+            Toggle("Show incompleted tasks", isOn: $isIncomplete)
             Toggle("Show completed tasks", isOn: $isComplete)
             
+            
+            
         }
+        
         
        
         
         Button("Confirm") {
             dismiss()
+            if isComplete {
+            Task {
+                    await viewModel.getallTodosWithFilter(isComplete: isComplete, isIncomplete: isIncomplete)
+                }
+            }
+            if isIncomplete {
+                Task {
+                    await viewModel.getallTodosWithFilter(isComplete: isComplete, isIncomplete: isIncomplete)
+                }
+            }
+            else {
+                Task {
+                    await viewModel.getallTodos()
+                }
+            }
         }
         .font(.title)
         .padding()
         .background(Color.clear)
         .border(Color.black)
         .cornerRadius(3)
+        .offset(y: 200)
+        
     }
 }

@@ -31,11 +31,25 @@ class TodoApiCalls {
         return todos
     }
     
-    func getTodosWithFilters(filter: Bool) async -> [Todo] {
-        let req = AF.request("\(localHost)/task/complete", method: .get, parameters: nil)
+    func getTodosWithFilters(isComplete: Bool, isIncomplete: Bool) async -> [Todo] {
+        
+        let req = AF.request("\(localHost)/task", method: .get, parameters: nil)
         let todos = try! await req.serializingDecodable([Todo].self).value
-        print(todos)
+        
+        if isComplete {
+            let req = AF.request("\(localHost)/task/complete", method: .get, parameters: nil)
+            let todos = try! await req.serializingDecodable([Todo].self).value
+            return todos
+        }
+        if isIncomplete {
+            let req = AF.request("\(localHost)/task/incomplete", method: .get, parameters: nil)
+            let todos = try! await req.serializingDecodable([Todo].self).value
+            return todos
+        }
+        print("This is incomplete")
+        print(isIncomplete)
         return todos
+        
     }
     
     func createTodo(_ newTodo:NewTodo) async {
