@@ -17,6 +17,7 @@ struct ContentView: View {
       @State private var showingFilterModal = false
       @State private var isComplete = false
       @State private var isIncomplete = false
+      @State private var completeStatus = false
     var body: some View {
         HStack{
             
@@ -25,7 +26,6 @@ struct ContentView: View {
 
             }) {
                 Image(systemName: "rectangle.stack.fill.badge.plus")
-//                  .renderingMode(.original)
                   .resizable()
                   .aspectRatio(contentMode: .fit)
                   .frame(width: 30, height: 30)
@@ -35,17 +35,13 @@ struct ContentView: View {
              .sheet(isPresented: $showingPostModal) {
                  PostModalView(viewModel: viewModel)
                 }
-                
-                
         }
         
         HStack {
-//            Text(String(isComplete))
             Button(action: {
                 showingFilterModal.toggle()
             }){
                 Image(systemName: "list.bullet")
-//                  .renderingMode(.original)
                   .resizable()
                   .aspectRatio(contentMode: .fit)
                   .frame(width: 30, height: 30)
@@ -62,7 +58,6 @@ struct ContentView: View {
             .task {
                  await viewModel.getallTodos()
                 }
-
         VStack {
             List(viewModel.todos) { todos in
                 VStack {
@@ -83,7 +78,9 @@ struct ContentView: View {
                         }.onTapGesture {
                             print("Complete button is tapped")
                             Task {
-                                await viewModel.updateStatus(todoUUID: todos.uuid)
+                                completeStatus = todos.completed
+                                completeStatus.toggle()
+                                await viewModel.updateStatus(todoUUID: todos.uuid, completeStatus: completeStatus)
                                 await viewModel.getallTodos()
 
                             }
@@ -104,7 +101,6 @@ struct ContentView: View {
                             UpdateModalView(viewModel: viewModel, todo: todos.todo, dueDate: todos.dueDate, todoUUID: todos.uuid)
                         }
                         
-                        
                         Spacer()
                         Button(action: {
                             
@@ -117,7 +113,6 @@ struct ContentView: View {
                         }.onTapGesture {
                             print("Delete button is tapped")
                             Task {
-//                                await test.delTodo(todoUUID: todos.uuid)
                                 await viewModel.deleteTodo(todoUUID: todos.uuid)
                                 await viewModel.getallTodos()
                             }
@@ -125,14 +120,7 @@ struct ContentView: View {
                     }
 
                 }
-//                .onTapGesture(perform: {
-//                    print("list was tapped")
-//                    Task {
-//                        await test.getAtodo(todoUUID: todos.uuid)
-//                    }
-//                })
             }
-
         }
     }
 }
@@ -153,6 +141,7 @@ struct UpdateModalView: View {
 
     @State private var updatedTodo: String = ""
     @State private var updatedDueDate: String = ""
+    @State var selectedDate = Date()
     
     
     var body: some View {
@@ -166,17 +155,23 @@ struct UpdateModalView: View {
                 .background(Color.clear)
                 .border(Color.black)
                 .cornerRadius(3)
-        TextField("\(dueDate)", text: $updatedDueDate)
-                .font(.custom("", size: 30))
-                .background(Color.clear)
-                .border(Color.black)
-                .cornerRadius(3)
         }
         .padding()
         .textFieldStyle(PlainTextFieldStyle())
         
+        VStack {
+            Form{
+                
+                DatePicker("Due Date", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
+                    Text("Your due date is: \(selectedDate)")
+                }.padding()
+            }
+        
         
         Button("UPDATE") {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .short
+            updatedDueDate = formatter.string(from: selectedDate)
             Task {
                 await viewModel.updateTodo(todoUUID: todoUUID, updateTodo: updatedTodo, updateDueDate: updatedDueDate)
                 await viewModel.getallTodos()
@@ -195,6 +190,7 @@ struct UpdateModalView: View {
 
 struct PostModalView: View {
     @Environment(\.dismiss) var dismiss
+    @State var selectedDate = Date()
     var viewModel: ViewModel
     
     @State private var newTodo: String = ""
@@ -209,16 +205,22 @@ struct PostModalView: View {
                 .background(Color.clear)
                 .border(Color.black)
                 .cornerRadius(3)
-        TextField("Due Date", text: $newDueDate)
-                .font(.custom("", size: 30))
-                .background(Color.clear)
-                .border(Color.black)
-                .cornerRadius(3)
         }
             .padding()
             .textFieldStyle(PlainTextFieldStyle())
         
+        
+        VStack {
+            Form{
+                DatePicker("Due Date", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
+                    Text("Your due date is: \(selectedDate)")
+                }.padding()
+            }
+            
         Button("Submit") {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .short
+            newDueDate = formatter.string(from: selectedDate)
             Task {
                 await viewModel.postTodo(NewTodo(todo: newTodo, dueDate: newDueDate, completed: false))
                 await viewModel.getallTodos()
@@ -233,8 +235,6 @@ struct PostModalView: View {
     }
 }
 
-
-
 struct FilterView: View {
     @Environment(\.dismiss) var dismiss
     
@@ -245,11 +245,11 @@ struct FilterView: View {
     var body: some View {
         
         Text("Filter")
+        
             .font(.custom("", size: 50))
 
             .padding()
             .textFieldStyle(PlainTextFieldStyle())
-//        Text(String(isComplete))
         
         VStack {
             Toggle("Show incompleted tasks", isOn: $isIncomplete)
@@ -257,9 +257,6 @@ struct FilterView: View {
             Toggle("Show completed tasks", isOn: $isComplete)
                 .padding()
         }
-        
-        
-       
         
         Button("Confirm") {
             dismiss()
@@ -285,6 +282,5 @@ struct FilterView: View {
         .border(Color.black)
         .cornerRadius(3)
         .offset(y: 200)
-        
     }
 }

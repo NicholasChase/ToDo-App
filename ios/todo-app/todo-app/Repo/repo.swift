@@ -13,17 +13,20 @@ struct Nothing: Codable {
 }
 
 protocol TodoRepo {
-    func getTodos() async -> Todo
-    func getTodosWithFilters() async -> Todo
-    func createTodo(newTodo: NewTodo) async
-    func delTodo(todoUUID: UUID)   async
-    func updateTodo(todoUUID: UUID) async
+    func getTodos() async -> [Todo]
+    func getTodosWithFilters(isComplete: Bool, isIncomplete: Bool) async -> [Todo]
+    func createTodo(_ newTodo:NewTodo) async
+    func delTodo(todoUUID: UUID) async
+    func updateTodo(todoUUID: UUID, updateTodo: String, updateDueDate: String) async
     func getAtodo(todoUUID: UUID) async
+    func updateStatus(todoUUID: UUID, completeStatus: Bool) async
 }
 
 let localHost = "http://localhost:5000"
+let network = "http://169.254.26.203:5000"
 
-class TodoApiCalls {
+class TodoApiCalls : TodoRepo {
+    
     func getTodos() async -> [Todo] {
         let req = AF.request("\(localHost)/task", method: .get, parameters: nil)
         let todos = try! await req.serializingDecodable([Todo].self).value
@@ -86,21 +89,21 @@ class TodoApiCalls {
         print(todos)
     }
     
-    func updateCompleteTodo(todoUUID: UUID, updateDueDate: String) async {
-        let params: Parameters = [
-            "dueDate": updateDueDate,
-            "completed": true,
-        ]
-        let strUUID = String(describing: todoUUID)
-        let req = AF.request("\(localHost)/task/\(strUUID)", method: .put, parameters: params, headers: nil)
-        _ = try! await req.serializingDecodable(Nothing.self).value
-        
-    }
+//    func updateCompleteTodo(todoUUID: UUID, updateDueDate: String) async {
+//        let params: Parameters = [
+//            "dueDate": updateDueDate,
+//            "completed": true,
+//        ]
+//        let strUUID = String(describing: todoUUID)
+//        let req = AF.request("\(localHost)/task/\(strUUID)", method: .put, parameters: params, headers: nil)
+//        _ = try! await req.serializingDecodable(Nothing.self).value
+//
+//    }
     
     
-    func updateStatus(todoUUID: UUID) async {
+    func updateStatus(todoUUID: UUID, completeStatus: Bool) async {
         let params: Parameters = [
-            "completed": true,
+            "completed": completeStatus,
         ]
         let strUUID = String(describing: todoUUID)
         let req = AF.request("\(localHost)/task/statusComplete/\(strUUID)", method: .put, parameters: params, headers: nil)

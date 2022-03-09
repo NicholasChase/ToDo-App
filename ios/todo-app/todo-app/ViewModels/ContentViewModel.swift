@@ -13,54 +13,41 @@ import SwiftUI
         @Published var todos: [Todo] = []
          let todoApi = TodoApiCalls()
         func getallTodos() async {
-            let test = TodoApiCalls()
             
             let allTodos = await todoApi.getTodos()
             self.todos = allTodos
         }
          
          func getallTodosWithFilter(isComplete: Bool, isIncomplete: Bool) async {
-             let test = TodoApiCalls()
-             let allTodos = await test.getTodosWithFilters(isComplete: isComplete, isIncomplete: isIncomplete)
+             let allTodos = await todoApi.getTodosWithFilters(isComplete: isComplete, isIncomplete: isIncomplete)
              self.todos = allTodos
          }
          
          
          func deleteTodo(todoUUID: UUID) async {
-             let test = TodoApiCalls()
              let uid = todoUUID
-             await test.delTodo(todoUUID: uid)
+             await todoApi.delTodo(todoUUID: uid)
              
          }
          func postTodo(_ newTodo:NewTodo) async  {
-             let test = TodoApiCalls()
-             await test.createTodo(newTodo)
+             await todoApi.createTodo(newTodo)
          }
-//         func updateTodo(todoUUID: UUID) async {
-//             let test = TodoApiCalls()
-//             let uid = todoUUID
-//             await test.updateTodo(todoUUID: uid)
-//         }
+         
          func updateTodo(todoUUID: UUID, updateTodo: String, updateDueDate: String) async {
-             let test = TodoApiCalls()
              let uid = todoUUID
              let uTodo = updateTodo
              let uDueDate = updateDueDate
-             await test.updateTodo(todoUUID: uid, updateTodo: uTodo, updateDueDate: uDueDate)
+             await todoApi.updateTodo(todoUUID: uid, updateTodo: uTodo, updateDueDate: uDueDate)
          }
          
-         func updateCompleteTodo(todoUUID: UUID, updateDueDate: String) async {
-             let test = TodoApiCalls()
+//         func updateCompleteTodo(todoUUID: UUID, updateDueDate: String) async {
+//             let uid = todoUUID
+//             let uDueDate = updateDueDate
+//             await todoApi.updateCompleteTodo(todoUUID: uid, updateDueDate: uDueDate)
+//         }
+         func updateStatus(todoUUID: UUID, completeStatus: Bool) async {
              let uid = todoUUID
-             let uDueDate = updateDueDate
-             await test.updateCompleteTodo(todoUUID: uid, updateDueDate: uDueDate)
-         }
-         func updateStatus(todoUUID: UUID) async {
-             let test = TodoApiCalls()
-             let uid = todoUUID
-             await test.updateStatus(todoUUID: uid)
+             await todoApi.updateStatus(todoUUID: uid, completeStatus: completeStatus)
          }
          
     }
-//}
-
